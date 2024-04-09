@@ -1,25 +1,10 @@
-[package]
-name = "rust-arduino"
-version = "0.1.0"
-authors = ["Johannes Maria Frank <jmfrank63@gmail.com>"]
-edition = "2021"
-license = "MIT OR Apache-2.0"
-
-[[bin]]
-name = "rust-arduino"
-test = false
-bench = false
-
-[dependencies]
-panic-halt = "0.2.0"
-ufmt = "0.2.0"
-nb = "0.1.2"
-embedded-hal = "0.2.3"
-
-[dependencies.arduino-hal]
-git = "https://github.com/rahix/avr-hal"
-rev = "45a37eb746d264166c3ea382fed323a204104998"
-features = ["arduino-uno"]
+[workspace]
+members = [
+    "blinky_led",
+    "variable_blink",
+    "pass_through",
+]
+resolver = "2"
 
 # Configure the build for minimal size - AVRs have very little program memory
 [profile.dev]

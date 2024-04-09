@@ -1,0 +1,22 @@
+[package]
+name = "variable_blink"
+version = "0.1.0"
+authors = ["Johannes Maria Frank <jmfrank63@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "variable_blink"
+test = false
+bench = false
+
+[dependencies]
+panic-halt = "0.2.0"
+ufmt = "0.2.0"
+nb = "1.1.0"
+embedded-hal = "1.0.0"
+
+[dependencies.arduino-hal]
+git = "https://github.com/rahix/avr-hal"
+rev = "2eb28fa3024ecbf9898c8e900e744d1201ceffca"
+features = ["arduino-uno"]
