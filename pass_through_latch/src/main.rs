@@ -8,7 +8,13 @@ fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(dp);
 
-    let mut adc = arduino_hal::adc::Adc::new(dp.ADC, Default::default());
+    let mut adc = arduino_hal::adc::Adc::new(
+        dp.ADC,
+        arduino_hal::adc::AdcSettings {
+            clock_divider: arduino_hal::adc::ClockDivider::Factor2,
+            ..Default::default()
+        },
+    );
     let a0 = pins.a0.into_analog_input(&mut adc);
 
     // Convert pins 2 to 11 to output pins
@@ -108,7 +114,6 @@ fn main() -> ! {
             }
         }
         control.set_high();
-        arduino_hal::delay_ms(10);
     }
 
 }

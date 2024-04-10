@@ -45,18 +45,19 @@ fn main() -> ! {
     loop {
         // Wait for the conversion to complete
         while dp.ADC.adcsra.read().adsc().bit_is_set() {}
-
+        // Enable the latch takeover
+        dp.PORTB.portb.modify(|_, w| w.pb4().set_bit());
         // Read the result
         let voltage = dp.ADC.adc.read().bits() << 2;
         // Start the next conversion
         dp.ADC
             .adcsra
-            .write(|w| w.aden().set_bit().adsc().set_bit().adps().prescaler_128());
-
+            .write(|w| w.aden().set_bit().adsc().set_bit().adps().prescaler_2());
         // prepare the bits for portb and portd
         let portd_byte = voltage as u8;
-        let portb_byte = (voltage >> 8) as u8 | 0b00010000;
-
+        let portb_byte = (voltage >> 8) as u8;
+        // Disable the latch takeover
+        dp.PORTB.portb.modify(|_, w| w.pb4().clear_bit());
         // Set PD2 to PD7 as output
         dp.PORTD.portd.write(|w| unsafe { w.bits(portd_byte) });
         // Set PB0 to PB3 as output
