@@ -43,10 +43,10 @@ fn main() -> ! {
     });
 
     loop {
-        // Wait for the conversion to complete
-        while dp.ADC.adcsra.read().adsc().bit_is_set() {}
         // Enable the latch takeover
         dp.PORTB.portb.modify(|_, w| w.pb4().set_bit());
+        // Wait for the conversion to complete
+        while dp.ADC.adcsra.read().adsc().bit_is_set() {}
         // Read the result
         let voltage = dp.ADC.adc.read().bits() << 2;
         // Start the next conversion
