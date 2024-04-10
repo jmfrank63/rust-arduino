@@ -19,5 +19,5 @@ avr-device = "0.5.4"
 
 [dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"
-rev = "2eb28fa3024ecbf9898c8e900e744d1201ceffca"
+rev = "d5f1472a2ea19c84a2edab418ada479314fe5ae7"
 features = ["arduino-uno"]

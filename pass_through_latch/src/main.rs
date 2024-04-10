@@ -25,9 +25,12 @@ fn main() -> ! {
         pins.d11.into_output(),
     );
 
+    let mut control = pins.d12.into_output();
+
     loop {
         // Read from the ADC and map the value to a range of 0 to 1023.
         let adc_value = adc.read_blocking(&a0);
+        control.set_low();
         // Output the ADC value to pins 2 to 11
         for i in 0..10 {
             match i {
@@ -104,6 +107,8 @@ fn main() -> ! {
                 _ => {}
             }
         }
+        control.set_high();
+        arduino_hal::delay_ms(10);
     }
 
 }

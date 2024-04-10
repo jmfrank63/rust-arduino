@@ -1,14 +1,9 @@
 [package]
-name = "blinky_led"
+name = "low_level_passthrough"
 version = "0.1.0"
 authors = ["Johannes Maria Frank <jmfrank63@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
-
-[[bin]]
-name = "blinky_led"
-test = false
-bench = false
 
 [dependencies]
 panic-halt = "0.2.0"
@@ -16,7 +11,17 @@ ufmt = "0.2.0"
 nb = "1.1.0"
 embedded-hal = "1.0.0"
 
+[dependencies.avr-device]
+version = "0.5.4"
+features = ["atmega328pb"]
+
+[[bin]]
+name = "low_level_passthrough"
+test = false
+bench = false
+
 [dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"
+# rev = "2eb28fa3024ecbf9898c8e900e744d1201ceffca"
 rev = "d5f1472a2ea19c84a2edab418ada479314fe5ae7"
 features = ["arduino-uno"]

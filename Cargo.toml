@@ -2,7 +2,10 @@
 members = [
     "blinky_led",
     "variable_blink",
-    "pass_through",
+    "pass_through", 
+    "pass_through_latch",
+    "low_level_passthrough",
+    "low_level_passthrough_latch",
 ]
 resolver = "2"
 
