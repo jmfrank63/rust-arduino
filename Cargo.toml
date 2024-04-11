@@ -6,6 +6,7 @@ members = [
     "pass_through_latch",
     "low_level_passthrough",
     "low_level_passthrough_latch",
+    "low_level_lowpass_latch",
 ]
 resolver = "2"
 

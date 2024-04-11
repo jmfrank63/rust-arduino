@@ -134,6 +134,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "723dce4e9f25b6e6c5f35628e144794e5b459216ed7da97b7c4b66cdb3fa82ca"
 
 [[package]]
+name = "filters"
+version = "0.1.0"
+
+[[package]]
+name = "low_level_lowpass_latch"
+version = "0.1.0"
+dependencies = [
+ "arduino-hal",
+ "avr-device",
+ "embedded-hal 1.0.0",
+ "filters",
+ "nb 1.1.0",
+ "panic-halt",
+ "ufmt",
+]
+
+[[package]]
 name = "low_level_passthrough"
 version = "0.1.0"
 dependencies = [

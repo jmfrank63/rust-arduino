@@ -1,0 +1,23 @@
+[package]
+name = "low_level_lowpass_latch"
+version = "0.1.0"
+authors = ["Johannes Maria Frank <jmfrank63@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# Your common dependencies go here
+panic-halt = { version = "0.2.0" }
+ufmt = { version = "0.2.0", optional = true }
+nb = { version = "1.1.0", optional = true }
+embedded-hal = { version = "1.0.0", optional = true }
+filters ={ path = "../../filters" }
+
+[target.'cfg(target_arch = "avr")'.dependencies]
+avr-device = { version = "0.5.4", features = ["atmega328pb"] }
+arduino-hal = { git = "https://github.com/rahix/avr-hal", rev = "d5f1472a2ea19c84a2edab418ada479314fe5ae7", features = ["arduino-uno"] }
+
+[[bin]]
+name = "low_level_lowpass_latch"
+test = false
+bench = false
