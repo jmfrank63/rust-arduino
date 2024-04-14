@@ -96,7 +96,7 @@ fn main() -> ! {
                 }
 
                 // Read the alpha value and update the filter
-                let alpha = (dp.PORTC.pinc.read().bits() & 0b00111110) >> 1;
+                let alpha = ((dp.PORTC.pinc.read().bits() & 0b00111110) >> 1) + 1;
                 filter.set_alpha(alpha as u16);
             }
         });
