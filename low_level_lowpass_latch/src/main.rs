@@ -2,10 +2,9 @@
 #![no_main]
 #![feature(abi_avr_interrupt)]
 
-use filters::LowPassFilter;
+use filters::{HighPassFilter, LowPassFilter};
 use panic_halt as _;
 
-const CUTOFF_FREQUENCY: u16 = 1;
 static mut FLAG: bool = false;
 
 #[avr_device::entry]
@@ -33,7 +32,7 @@ fn main() -> ! {
             .pd7()
             .set_bit()
     });
-    // Set PB0 to PB3 as output
+    // Set PB0 to PB4 as output PB5 as input
     dp.PORTB.ddrb.write(|w| {
         w.pb0()
             .set_bit()
@@ -45,6 +44,8 @@ fn main() -> ! {
             .set_bit()
             .pb4()
             .set_bit()
+            .pb5()
+            .clear_bit()
     });
 
     // Set PC1 to PC5 as input
@@ -77,51 +78,63 @@ fn main() -> ! {
             .set_bit()
     });
     unsafe { avr_device::interrupt::enable() };
+    // Enable pin change interrupt PCIE1 for PC1 to PC5
     dp.EXINT.pcmsk1.write(|w| w.pcint().bits(0b0011_1110));
     dp.EXINT.pcicr.write(|w| w.pcie().bits(0b0000_0010));
 
-    let mut filter = LowPassFilter::new(CUTOFF_FREQUENCY);
-    let mut voltage: u16;
+    // Read the alpha value and create the filter
+    let alpha = (dp.PORTC.pinc.read().bits() & 0b00111110) >> 1;
+
+    let mut lowpass_filter = LowPassFilter::new(alpha as u16);
+    let mut highpass_filter = HighPassFilter::new(alpha as u16);
+    let mut input_value: u16;
 
     loop {
-        // Enable the latch takeover
-        dp.PORTB.portb.modify(|_, w| w.pb4().set_bit());
+        // read the alpha change flag
+        let flag = unsafe { FLAG };
 
-        avr_device::interrupt::free(|_| {
-            let flag = unsafe { FLAG };
-            if flag {
-                // Reset the flag
-                unsafe {
-                    FLAG = false;
-                }
-
-                // Read the alpha value and update the filter
-                let alpha = ((dp.PORTC.pinc.read().bits() & 0b00111110) >> 1) + 1;
-                filter.set_alpha(alpha as u16);
+        // Set alpha value if it has changed
+        if flag {
+            avr_device::interrupt::free(|_| unsafe {
+                FLAG = false;
+            });
+            // Read the alpha value and update the filter
+            let alpha = (dp.PORTC.pinc.read().bits() & 0b00111110) >> 1;
+            if dp.PORTB.pinb.read().pb5().bit_is_set() {
+                highpass_filter.set_alpha(alpha as u16);
+                highpass_filter.reset();
+            } else {
+                lowpass_filter.set_alpha(alpha as u16);
+                lowpass_filter.reset();
             }
-        });
+        }
 
         // Wait for the conversion to complete
         while dp.ADC.adcsra.read().adsc().bit_is_set() {}
 
         // Read the result
-        voltage = dp.ADC.adc.read().bits();
+        input_value = dp.ADC.adc.read().bits();
         // Start the next conversion
         dp.ADC
             .adcsra
             .write(|w| w.aden().set_bit().adsc().set_bit().adps().prescaler_2());
-        // Apply the filter
-        filter.low_pass(&mut voltage);
+
+        // Apply the filter dependent on the the PB5 value
+        if dp.PORTB.pinb.read().pb5().bit_is_set() {
+            highpass_filter.high_pass(&mut input_value);
+        } else {
+            lowpass_filter.low_pass(&mut input_value);
+        }
         // Disable the latch takeover
         dp.PORTB.portb.modify(|_, w| w.pb4().clear_bit());
         // Set PD2 to PD7 as output
         dp.PORTD
             .portd
-            .write(|w| unsafe { w.bits((voltage as u8) << 2) });
-        // Set PB0 to PB3 as output
+            .write(|w| unsafe { w.bits((input_value as u8) << 2) });
+        // Set PB0 to PB3 and PB5
         dp.PORTB
             .portb
-            .write(|w| unsafe { w.bits((voltage >> 6) as u8) });
+            .write(|w| unsafe { w.bits((input_value >> 6) as u8 | 0b0001_0000) });
     }
 }
 
