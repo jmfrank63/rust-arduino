@@ -87,7 +87,6 @@ fn main() -> ! {
 
     let mut lowpass_filter = LowPassFilter::new(alpha as u16);
     let mut highpass_filter = HighPassFilter::new(alpha as u16);
-    let mut input_value: u16;
 
     loop {
         // read the alpha change flag
@@ -113,28 +112,28 @@ fn main() -> ! {
         while dp.ADC.adcsra.read().adsc().bit_is_set() {}
 
         // Read the result
-        input_value = dp.ADC.adc.read().bits();
+        let input_value = dp.ADC.adc.read().bits();
         // Start the next conversion
         dp.ADC
             .adcsra
             .write(|w| w.aden().set_bit().adsc().set_bit().adps().prescaler_2());
 
         // Apply the filter dependent on the the PB5 value
-        if dp.PORTB.pinb.read().pb5().bit_is_set() {
-            highpass_filter.high_pass(&mut input_value);
+        let output_value = if dp.PORTB.pinb.read().pb5().bit_is_set() {
+            highpass_filter.high_pass(input_value)
         } else {
-            lowpass_filter.low_pass(&mut input_value);
-        }
+            lowpass_filter.low_pass(input_value)
+        };
         // Disable the latch takeover
         dp.PORTB.portb.modify(|_, w| w.pb4().clear_bit());
         // Set PD2 to PD7 as output
         dp.PORTD
             .portd
-            .write(|w| unsafe { w.bits((input_value as u8) << 2) });
+            .write(|w| unsafe { w.bits((output_value as u8) << 2) });
         // Set PB0 to PB3 and PB5
         dp.PORTB
             .portb
-            .write(|w| unsafe { w.bits((input_value >> 6) as u8 | 0b0001_0000) });
+            .write(|w| unsafe { w.bits((output_value >> 6) as u8 | 0b0001_0000) });
     }
 }
 
